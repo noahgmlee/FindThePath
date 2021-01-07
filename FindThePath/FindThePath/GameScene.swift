@@ -11,33 +11,57 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+ //   private var label : SKLabelNode?
+ //   private var spinnyNode : SKShapeNode?
+    var numRows = 9
+    var numCols = 5
+    var arr:[[SKSpriteNode]]?// = [[SKSpriteNode]](repeating: [SKSpriteNode](repeating: SKSpriteNode.init(), count: numCols), count: numRows)
+    let screenSize = UIScreen.main.bounds
     
     override func didMove(to view: SKView) {
-        
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
+        if let grid = Grid(blockSize: screenSize.height/CGFloat(numCols), rows:numRows, cols:numCols) {
+            grid.position = CGPoint (x:frame.midX, y:frame.midY)
+            addChild(grid)
+            makeArray()
+            for row in 0..<numRows {
+                if row == 0 || row == 8 {
+                    for col in 0..<numCols {
+                        let platform = SKSpriteNode(imageNamed: "WoodPlatform")
+                        platform.setScale(grid.blockSize/64.0)
+                        platform.position = grid.gridPosition(row:row, col:col)
+                        grid.addChild(platform)
+                        arr![row][col] = platform
+                    }
+                }
+                else {
+                    for col in 0..<numCols {
+                        let tile = SKSpriteNode(imageNamed: "Tile")
+                        tile.setScale(grid.blockSize/64.0 * 0.75)
+                        tile.position = grid.gridPosition(row: row, col: col)
+                        grid.addChild(tile)
+                        arr![row][col] = tile
+                    }
+                }
+            }
+     
+            let path = PathArray(rows: numRows, cols: numCols)
+            path.createPath()
+            for row in 1..<numRows-1 {
+                for col in 0..<numCols{
+                    if path.arr![row][col].isPath == true{
+                        arr![row][col].color = .red
+                        arr![row][col].colorBlendFactor = 1
+                    }
+                }
+            }
         }
     }
     
+    func makeArray(){
+        arr = [[SKSpriteNode]](repeating: [SKSpriteNode](repeating: SKSpriteNode(), count: numCols), count: numRows)
+    }
     
+/*
     func touchDown(atPoint pos : CGPoint) {
         if let n = self.spinnyNode?.copy() as! SKShapeNode? {
             n.position = pos
@@ -86,4 +110,5 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
+ */
 }
