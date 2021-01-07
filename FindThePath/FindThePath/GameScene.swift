@@ -11,16 +11,18 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
+ //   private var label : SKLabelNode?
+ //   private var spinnyNode : SKShapeNode?
     var numRows = 9
     var numCols = 5
+    var arr:[[SKSpriteNode]]?// = [[SKSpriteNode]](repeating: [SKSpriteNode](repeating: SKSpriteNode.init(), count: numCols), count: numRows)
     let screenSize = UIScreen.main.bounds
     
     override func didMove(to view: SKView) {
         if let grid = Grid(blockSize: screenSize.height/CGFloat(numCols), rows:numRows, cols:numCols) {
             grid.position = CGPoint (x:frame.midX, y:frame.midY)
             addChild(grid)
+            makeArray()
             for row in 0..<numRows {
                 if row == 0 || row == 8 {
                     for col in 0..<numCols {
@@ -28,6 +30,7 @@ class GameScene: SKScene {
                         platform.setScale(grid.blockSize/64.0)
                         platform.position = grid.gridPosition(row:row, col:col)
                         grid.addChild(platform)
+                        arr![row][col] = platform
                     }
                 }
                 else {
@@ -36,10 +39,26 @@ class GameScene: SKScene {
                         tile.setScale(grid.blockSize/64.0 * 0.75)
                         tile.position = grid.gridPosition(row: row, col: col)
                         grid.addChild(tile)
+                        arr![row][col] = tile
+                    }
+                }
+            }
+     
+            let path = PathArray(rows: numRows, cols: numCols)
+            path.createPath()
+            for row in 1..<numRows-1 {
+                for col in 0..<numCols{
+                    if path.arr![row][col].isPath == true{
+                        arr![row][col].color = .red
+                        arr![row][col].colorBlendFactor = 1
                     }
                 }
             }
         }
+    }
+    
+    func makeArray(){
+        arr = [[SKSpriteNode]](repeating: [SKSpriteNode](repeating: SKSpriteNode(), count: numCols), count: numRows)
     }
     
 /*
