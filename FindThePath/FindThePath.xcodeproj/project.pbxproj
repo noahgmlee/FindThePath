@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F620B0CF25A7CBCD006691B8 /* TileMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = F620B0CE25A7CBCD006691B8 /* TileMatrix.swift */; };
 		F672745825A65A3900B2D90E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672745725A65A3900B2D90E /* AppDelegate.swift */; };
 		F672745A25A65A3900B2D90E /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = F672745925A65A3900B2D90E /* GameScene.sks */; };
 		F672745C25A65A3900B2D90E /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = F672745B25A65A3900B2D90E /* Actions.sks */; };
@@ -15,11 +16,10 @@
 		F672746325A65A3900B2D90E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F672746125A65A3900B2D90E /* Main.storyboard */; };
 		F672746525A65A3900B2D90E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F672746425A65A3900B2D90E /* Assets.xcassets */; };
 		F672746825A65A3900B2D90E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F672746625A65A3900B2D90E /* LaunchScreen.storyboard */; };
-		F672747025A65D0200B2D90E /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672746F25A65D0200B2D90E /* Grid.swift */; };
-		F672747225A6782D00B2D90E /* PathArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672747125A6782D00B2D90E /* PathArray.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F620B0CE25A7CBCD006691B8 /* TileMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileMatrix.swift; sourceTree = "<group>"; };
 		F672745425A65A3900B2D90E /* FindThePath.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FindThePath.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F672745725A65A3900B2D90E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F672745925A65A3900B2D90E /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -30,8 +30,6 @@
 		F672746425A65A3900B2D90E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F672746725A65A3900B2D90E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F672746925A65A3900B2D90E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F672746F25A65D0200B2D90E /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
-		F672747125A6782D00B2D90E /* PathArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathArray.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +66,7 @@
 				F672745925A65A3900B2D90E /* GameScene.sks */,
 				F672745B25A65A3900B2D90E /* Actions.sks */,
 				F672745D25A65A3900B2D90E /* GameScene.swift */,
-				F672747125A6782D00B2D90E /* PathArray.swift */,
-				F672746F25A65D0200B2D90E /* Grid.swift */,
+				F620B0CE25A7CBCD006691B8 /* TileMatrix.swift */,
 				F672745F25A65A3900B2D90E /* GameViewController.swift */,
 				F672746125A65A3900B2D90E /* Main.storyboard */,
 				F672746425A65A3900B2D90E /* Assets.xcassets */,
@@ -154,10 +151,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				F672745E25A65A3900B2D90E /* GameScene.swift in Sources */,
-				F672747225A6782D00B2D90E /* PathArray.swift in Sources */,
 				F672746025A65A3900B2D90E /* GameViewController.swift in Sources */,
+				F620B0CF25A7CBCD006691B8 /* TileMatrix.swift in Sources */,
 				F672745825A65A3900B2D90E /* AppDelegate.swift in Sources */,
-				F672747025A65D0200B2D90E /* Grid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,6 +292,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = FindThePath/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NoahAle.FindThePath;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -310,6 +307,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = FindThePath/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NoahAle.FindThePath;
 				PRODUCT_NAME = "$(TARGET_NAME)";
