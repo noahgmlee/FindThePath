@@ -8,6 +8,10 @@
 
 import SpriteKit
 
+struct Index : Hashable{
+    var row:Int!
+    var col:Int!
+}
 struct Tile {
     var isPath = false
     var pathIndex = 0

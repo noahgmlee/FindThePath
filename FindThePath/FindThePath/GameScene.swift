@@ -17,7 +17,9 @@ class GameScene: SKScene {
     var numCols = 5
     var curRow:Int!
     var curCol:Int!
+    var maxIndex = 0
     var matrix:TileMatrix!
+    var travelledPath = Set<Index>()
     var Player:SKSpriteNode!
     var blockSize:CGFloat!
     let screenSize = UIScreen.main.bounds
@@ -48,14 +50,14 @@ class GameScene: SKScene {
             }
         }
         matrix.createPath()
-        for row in 1..<numRows-1 {
+       /* for row in 1..<numRows-1 {
             for col in 0..<numCols{
                 if matrix.arr[row][col].isPath == true{
                     matrix.arr[row][col].sprite.color = .red
                     matrix.arr[row][col].sprite.colorBlendFactor = 1
                 }
             }
-        }
+        }*/
         Player = SKSpriteNode(imageNamed: "Player")
         Player.setScale(blockSize/64.0 * 0.75)
         Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
@@ -157,27 +159,56 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
             let touchedNode = self.atPoint(t.location(in: self))
+            
+            //Arrow Key Player Move Logic
             if touchedNode.name == "up" {
-                Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
-                curRow = curRow - 1
+                if curRow > 0 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
+                    curRow = curRow - 1
+                }
+                if curRow == 0 {
+                    print("DING DING DING YOU DID IT!")
+                }
             }
             else if touchedNode.name == "right" {
-                Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1)
-                curCol = curCol + 1
+                if curCol < numCols - 1 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1)
+                    curCol = curCol + 1
+                }
             }
             else if touchedNode.name == "left" {
-                Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1)
-                curCol = curCol - 1
+                if curCol > 0 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1)
+                    curCol = curCol - 1
+                }
             }
             else if touchedNode.name == "down" {
-                Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
-                curRow = curRow + 1
+                if curRow < numRows - 1 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
+                    curRow = curRow + 1
+                }
+            } //end of player move logic
+            
+            //Tile logic
+            if matrix.arr[curRow][curCol].pathIndex != 0 {
+                matrix.arr[curRow][curCol].sprite.color = .yellow
+                matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
+                if matrix.arr[curRow][curCol].pathIndex > maxIndex {
+                    maxIndex = matrix.arr[curRow][curCol].pathIndex
+                }
+                travelledPath.insert(Index(row: curRow, col: curCol))
             }
+            
             if matrix.arr[curRow][curCol].isPath == false {
                 Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
                 curRow = numRows - 1
                 curCol = numCols/2
-            }
+                for i in travelledPath {
+                    if matrix.arr[i.row][i.col].pathIndex < maxIndex {
+                        matrix.arr[i.row][i.col].sprite.color = .white
+                    }
+                }
+            } //end of tile logic
         }
         /*
         let touchedNode = self.nodeAtPoint(positionInScene)
