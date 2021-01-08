@@ -9,8 +9,15 @@
 import SpriteKit
 
 struct Index : Hashable{
+    var hashValue: Int
+    
+    static func ==(lhs: Index, rhs: Index) -> Bool {
+        return (lhs.row == rhs.row) && (lhs.col == rhs.col)
+    }
+    
     var row:Int!
     var col:Int!
+    
 }
 struct Tile {
     var isPath = false

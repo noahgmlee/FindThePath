@@ -196,7 +196,7 @@ class GameScene: SKScene {
                 if matrix.arr[curRow][curCol].pathIndex > maxIndex {
                     maxIndex = matrix.arr[curRow][curCol].pathIndex
                 }
-                travelledPath.insert(Index(row: curRow, col: curCol))
+                travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
             }
             
             if matrix.arr[curRow][curCol].isPath == false {
