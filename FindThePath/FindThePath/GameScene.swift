@@ -21,6 +21,8 @@ class GameScene: SKScene {
     var matrix:TileMatrix!
     var travelledPath = Set<Index>()
     var Player:SKSpriteNode!
+    var startOfTouch:CGPoint!
+    var endOfTouch:CGPoint!
     var blockSize:CGFloat!
     let screenSize = UIScreen.main.bounds
     
@@ -158,9 +160,9 @@ class GameScene: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
-            let touchedNode = self.atPoint(t.location(in: self))
+            /*let touchedNode = self.atPoint(t.location(in: self))
             
-            //Arrow Key Player Move Logic
+            Arrow Key Player Move Logic
             if touchedNode.name == "up" {
                 if curRow > 0 {
                     Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
@@ -187,9 +189,11 @@ class GameScene: SKScene {
                     Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
                     curRow = curRow + 1
                 }
-            } //end of player move logic
+            } //end of player move logic*/
             
-            //Tile logic
+            startOfTouch = t.location(in: self)
+            
+            /*Tile logic
             if matrix.arr[curRow][curCol].pathIndex != 0 {
                 matrix.arr[curRow][curCol].sprite.color = .yellow
                 matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
@@ -208,7 +212,7 @@ class GameScene: SKScene {
                         matrix.arr[i.row][i.col].sprite.color = .white
                     }
                 }
-            } //end of tile logic
+            } //end of tile logic*/
         }
         /*
         let touchedNode = self.nodeAtPoint(positionInScene)
@@ -222,15 +226,72 @@ class GameScene: SKScene {
         }
         */
     }
-  /*
+    /*
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
     }
-    
+    */
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        for t in touches {
+            
+            endOfTouch = t.location(in: self)
+            let xDelta = endOfTouch.x - startOfTouch.x
+            let yDelta = endOfTouch.y - startOfTouch.y
+            var angle = atan2(yDelta, xDelta)
+            if yDelta < 0 {
+                angle = angle + (2 * CGFloat.pi)
+            }
+            if angle >= (CGFloat.pi / 4) && angle < (3 * CGFloat.pi / 4) { //up
+                if curRow > 0 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
+                    curRow = curRow - 1
+                }
+                if curRow == 0 {
+                    print("DING DING DING YOU DID IT!")
+                }
+            }
+            else if angle >= (3 * CGFloat.pi / 4) && angle < (5 * CGFloat.pi / 4) { //left
+                if curCol > 0 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1)
+                    curCol = curCol - 1
+                }
+            }
+            else if angle >= (5 * CGFloat.pi / 4) && angle < (7 * CGFloat.pi / 4) { //down
+                if curRow < numRows - 1 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
+                    curRow = curRow + 1
+                }
+            }
+            else { //right
+                if curCol < numCols - 1 {
+                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1)
+                    curCol = curCol + 1
+                }
+            }
+            
+            if matrix.arr[curRow][curCol].pathIndex != 0 {
+                matrix.arr[curRow][curCol].sprite.color = .yellow
+                matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
+                if matrix.arr[curRow][curCol].pathIndex > maxIndex {
+                    maxIndex = matrix.arr[curRow][curCol].pathIndex
+                }
+                travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
+            }
+            
+            if matrix.arr[curRow][curCol].isPath == false {
+                Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
+                curRow = numRows - 1
+                curCol = numCols/2
+                for i in travelledPath {
+                    if matrix.arr[i.row][i.col].pathIndex < maxIndex {
+                        matrix.arr[i.row][i.col].sprite.color = .white
+                    }
+                }
+            }
+            
+        }
     }
-    
+    /*
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
@@ -239,5 +300,5 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
- */
+    */
 }
