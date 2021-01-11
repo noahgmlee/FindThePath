@@ -11,26 +11,48 @@ import GameplayKit
 
 class GameScene: SKScene {
     
- //   private var label : SKLabelNode?
- //   private var spinnyNode : SKShapeNode?
     var numRows = 9
     var numCols = 5
+    
+    var level = 0
+    var inLevel = false
+    
     var curRow:Int!
     var curCol:Int!
     var maxIndex = 0
     var matrix:TileMatrix!
     var travelledPath = Set<Index>()
+    
     var Player:SKSpriteNode!
+    let fadeIn = SKAction.fadeIn(withDuration: 5)
+    let fadeOut = SKAction.fadeOut(withDuration: 5)
+    
     var startOfTouch:CGPoint!
     var endOfTouch:CGPoint!
+    
     var blockSize:CGFloat!
     let screenSize = UIScreen.main.bounds
     
     override func didMove(to view: SKView) {
-        matrix = TileMatrix(rows: numRows, cols: numCols)
+        
+        blockSize = screenSize.height/CGFloat(numCols) //this will be deleted when we have set sized sprites
+        Player = SKSpriteNode(imageNamed: "Player")
+        Player.setScale(blockSize/64.0 * 0.75)
+        Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
+        Player.zPosition = 3.0
+        self.addChild(Player)
+        curRow = numRows - 1
+        curCol = numCols / 2
+        
+        startNewLevel()
+    }
+    
+    func drawGrid(_ numRows:Int, _ numCols:Int) {
+        
         blockSize = screenSize.height/CGFloat(numCols)
+        matrix = TileMatrix(rows: numRows, cols: numCols)
         for row in 0..<numRows {
-            if row == 0 || row == 8 {
+            if row == 0 || row == numRows - 1 {
                 for col in 0..<numCols {
                     let platform = SKSpriteNode(imageNamed: "WoodPlatform")
                     platform.setScale(blockSize/64.0)
@@ -52,27 +74,34 @@ class GameScene: SKScene {
             }
         }
         matrix.createPath()
-       /* for row in 1..<numRows-1 {
-            for col in 0..<numCols{
-                if matrix.arr[row][col].isPath == true{
-                    matrix.arr[row][col].sprite.color = .red
-                    matrix.arr[row][col].sprite.colorBlendFactor = 1
-                }
+        
+    }
+    
+    func hideGrid() {
+        let deleteTile = SKAction.removeFromParent()
+        for row in 0..<numRows {
+            for col in 0..<numCols {
+                matrix.arr[row][col].sprite.run(deleteTile)
             }
-        }*/
-        Player = SKSpriteNode(imageNamed: "Player")
-        Player.setScale(blockSize/64.0 * 0.75)
-        Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
-        Player.zPosition = 3.0
-        self.addChild(Player)
-        curRow = numRows - 1
-        curCol = numCols / 2
-        /*
-        initializeArrow(dir: 0, bs: blockSize)
-        initializeArrow(dir: 1, bs: blockSize)
-        initializeArrow(dir: 2, bs: blockSize)
-        initializeArrow(dir: 3, bs: blockSize)
-        */
+        }
+    }
+    
+    func startNewLevel() {
+        level += 1
+        print("Level: \(level)")
+        if level % 5 == 0 {
+            numRows += 2
+            numCols += 2
+        }
+        drawGrid(numRows, numCols)
+        inLevel = true
+    }
+    
+    func endLevel() {
+        inLevel = false
+        hideGrid()
+        clearTravelledPath()
+        startNewLevel()
     }
     
     func gridPosition(blockSize:CGFloat, row:Int, col:Int) -> CGPoint {
@@ -82,89 +111,57 @@ class GameScene: SKScene {
         return CGPoint(x:x, y:y)
     }
     
-    func arrowPosition(xoffset: CGFloat, yoffset: CGFloat, blockSize: CGFloat, row: Int, col: Int) -> CGPoint {
-        let offset = blockSize / 2.0 + 0.5
-        let x = CGFloat(col) * blockSize - (blockSize * CGFloat(numCols)) / 2.0 + offset
-        let y = CGFloat(numRows - row - 1) * blockSize - (blockSize * CGFloat(numRows)) / 2.0 + offset
-        return CGPoint(x:x + xoffset, y:y + yoffset)
-    }
-    
-    func initializeArrow(dir: Int, bs: CGFloat) {
-        var xoffset:CGFloat!
-        var yoffset:CGFloat!
-        var rotation:CGFloat!
-        let arrow = SKSpriteNode(imageNamed: "arrow")
-        switch dir{
-        case 0:
-            xoffset = bs/2.0
-            yoffset = bs
-            rotation = 0
-            arrow.name = "up"
-        case 1:
-            xoffset = bs
-            yoffset = bs/2.0
-            rotation = 3/2
-            arrow.name = "right"
-        case 2:
-            xoffset = 0
-            yoffset = bs/2.0
-            rotation = 1/2
-            arrow.name = "left"
-        case 3:
-            xoffset = bs/2.0
-            yoffset = 0
-            rotation = 1.0
-            arrow.name = "down"
-        default:
-        return
-        }
-        arrow.position = arrowPosition(xoffset: xoffset, yoffset: yoffset, blockSize: bs, row: numRows - 1, col: 0)
-        arrow.zRotation = rotation * CGFloat.pi
-        arrow.setScale(bs/64.0)
-        arrow.zPosition = 3.0
-        self.addChild(arrow)
-    }
-    
     func movePlayer(_ dir:String) {
         switch dir {
         case "up":
-            if curRow > 0 && matrix.arr[curRow - 1][curCol].isPath == true {
-                let movePlayerUp = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol), duration: 0.1)
-                Player.run(movePlayerUp)
-                curRow = curRow - 1
-            }
-            else {
-                movePlayerToStart()
-            }
-            if curRow == 0 {
-                print("DING DING DING YOU DID IT!")
+            if curRow > 0 {
+                if matrix.arr[curRow - 1][curCol].isPath == true {
+                    let movePlayerUp = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol), duration: 0.1)
+                    if curRow - 1 == 0 {
+                        let playerEndLvlSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), SKAction.run(movePlayerToStart), SKAction.run(endLevel)])
+                        Player.run(playerEndLvlSequence)
+                    }
+                    else {
+                        Player.run(movePlayerUp)
+                        curRow = curRow - 1
+                    }
+                }
+                else {
+                    movePlayerToStart()
+                }
             }
         case "left":
-            if curCol > 0 && matrix.arr[curRow][curCol - 1].isPath == true {
-                let movePlayerLeft = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1), duration: 0.1)
-                Player.run(movePlayerLeft)
-                curCol = curCol - 1
-            }
-            else {
-                movePlayerToStart()
+            if curCol > 0 {
+                if matrix.arr[curRow][curCol - 1].isPath == true {
+                    let movePlayerLeft = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1), duration: 0.1)
+                    Player.run(movePlayerLeft)
+                    curCol = curCol - 1
+                }
+                else {
+                    movePlayerToStart()
+                }
             }
         case "down":
-            if curRow < numRows - 1 && matrix.arr[curRow + 1][curCol].isPath == true {
-                let movePlayerDown = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol), duration: 0.1)
-                Player.run(movePlayerDown)
-                curRow = curRow + 1
-            }
-            else {
-                movePlayerToStart()
+            if curRow < numRows - 1 {
+                if matrix.arr[curRow + 1][curCol].isPath == true {
+                    let movePlayerDown = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol), duration: 0.1)
+                    Player.run(movePlayerDown)
+                    curRow = curRow + 1
+                }
+                else {
+                    movePlayerToStart()
+                }
             }
         case "right":
-            if curCol < numCols - 1 && matrix.arr[curRow][curCol + 1].isPath == true {
-                let movePlayerRight = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1), duration: 0.1)
-                Player.run(movePlayerRight)
-                curCol = curCol + 1
-            }
-            else {
-                movePlayerToStart()
+            if curCol < numCols - 1 {
+                if matrix.arr[curRow][curCol + 1].isPath == true {
+                    let movePlayerRight = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1), duration: 0.1)
+                    Player.run(movePlayerRight)
+                    curCol = curCol + 1
+                }
+                else {
+                    movePlayerToStart()
+                }
             }
         default:
             return
@@ -182,156 +179,52 @@ class GameScene: SKScene {
         }
     }
     
-/*
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
+    func clearTravelledPath() {
+        travelledPath.removeAll()
     }
- */
-    /*
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
-    }
- 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
- */
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
-            /*let touchedNode = self.atPoint(t.location(in: self))
-            
-            Arrow Key Player Move Logic
-            if touchedNode.name == "up" {
-                if curRow > 0 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
-                    curRow = curRow - 1
-                }
-                if curRow == 0 {
-                    print("DING DING DING YOU DID IT!")
-                }
-            }
-            else if touchedNode.name == "right" {
-                if curCol < numCols - 1 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1)
-                    curCol = curCol + 1
-                }
-            }
-            else if touchedNode.name == "left" {
-                if curCol > 0 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1)
-                    curCol = curCol - 1
-                }
-            }
-            else if touchedNode.name == "down" {
-                if curRow < numRows - 1 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
-                    curRow = curRow + 1
-                }
-            } //end of player move logic*/
             
             startOfTouch = t.location(in: self)
             
-            /*Tile logic
-            if matrix.arr[curRow][curCol].pathIndex != 0 {
-                matrix.arr[curRow][curCol].sprite.color = .yellow
-                matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
-                if matrix.arr[curRow][curCol].pathIndex > maxIndex {
-                    maxIndex = matrix.arr[curRow][curCol].pathIndex
-                }
-                travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
-            }
-            
-            if matrix.arr[curRow][curCol].isPath == false {
-                Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
-                curRow = numRows - 1
-                curCol = numCols/2
-                for i in travelledPath {
-                    if matrix.arr[i.row][i.col].pathIndex < maxIndex {
-                        matrix.arr[i.row][i.col].sprite.color = .white
-                    }
-                }
-            } //end of tile logic*/
         }
-        /*
-        let touchedNode = self.nodeAtPoint(positionInScene)
-        
-        if let name = touchedNode.name
-        {
-            if name == "pineapple"
-            {
-                print("Touched")
-            }
-        }
-        */
     }
-    /*
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    */
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
             
-            endOfTouch = t.location(in: self)
-            let xDelta = endOfTouch.x - startOfTouch.x
-            let yDelta = endOfTouch.y - startOfTouch.y
-            var angle = atan2(yDelta, xDelta)
-            if yDelta < 0 {
-                angle = angle + (2 * CGFloat.pi)
-            }
-            
-            if angle >= (CGFloat.pi / 4) && angle < (3 * CGFloat.pi / 4) {
-                movePlayer("up")
-            }
-            else if angle >= (3 * CGFloat.pi / 4) && angle < (5 * CGFloat.pi / 4) {
-                movePlayer("left")
-            }
-            else if angle >= (5 * CGFloat.pi / 4) && angle < (7 * CGFloat.pi / 4) {
-                movePlayer("down")
-            }
-            else {
-                movePlayer("right")
-            }
-            
-            if matrix.arr[curRow][curCol].pathIndex != 0 {
-                matrix.arr[curRow][curCol].sprite.color = .yellow
-                matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
-                if matrix.arr[curRow][curCol].pathIndex > maxIndex {
-                    maxIndex = matrix.arr[curRow][curCol].pathIndex
+            if inLevel == true {
+                endOfTouch = t.location(in: self)
+                let xDelta = endOfTouch.x - startOfTouch.x
+                let yDelta = endOfTouch.y - startOfTouch.y
+                var angle = atan2(yDelta, xDelta)
+                if yDelta < 0 {
+                    angle = angle + (2 * CGFloat.pi)
                 }
-                travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
+                
+                if angle >= (CGFloat.pi / 4) && angle < (3 * CGFloat.pi / 4) {
+                    movePlayer("up")
+                }
+                else if angle >= (3 * CGFloat.pi / 4) && angle < (5 * CGFloat.pi / 4) {
+                    movePlayer("left")
+                }
+                else if angle >= (5 * CGFloat.pi / 4) && angle < (7 * CGFloat.pi / 4) {
+                    movePlayer("down")
+                }
+                else {
+                    movePlayer("right")
+                }
+                
+                if matrix.arr[curRow][curCol].pathIndex != 0 {
+                    matrix.arr[curRow][curCol].sprite.color = .yellow
+                    matrix.arr[curRow][curCol].sprite.colorBlendFactor = 1
+                    if matrix.arr[curRow][curCol].pathIndex > maxIndex {
+                        maxIndex = matrix.arr[curRow][curCol].pathIndex
+                    }
+                    travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
+                }
             }
         }
     }
-    /*
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-    }
-    */
 }
