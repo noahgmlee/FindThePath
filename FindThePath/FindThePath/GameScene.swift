@@ -67,10 +67,12 @@ class GameScene: SKScene {
         self.addChild(Player)
         curRow = numRows - 1
         curCol = numCols / 2
+        /*
         initializeArrow(dir: 0, bs: blockSize)
         initializeArrow(dir: 1, bs: blockSize)
         initializeArrow(dir: 2, bs: blockSize)
         initializeArrow(dir: 3, bs: blockSize)
+        */
     }
     
     func gridPosition(blockSize:CGFloat, row:Int, col:Int) -> CGPoint {
@@ -121,6 +123,63 @@ class GameScene: SKScene {
         arrow.setScale(bs/64.0)
         arrow.zPosition = 3.0
         self.addChild(arrow)
+    }
+    
+    func movePlayer(_ dir:String) {
+        switch dir {
+        case "up":
+            if curRow > 0 && matrix.arr[curRow - 1][curCol].isPath == true {
+                let movePlayerUp = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol), duration: 0.1)
+                Player.run(movePlayerUp)
+                curRow = curRow - 1
+            }
+            else {
+                movePlayerToStart()
+            }
+            if curRow == 0 {
+                print("DING DING DING YOU DID IT!")
+            }
+        case "left":
+            if curCol > 0 && matrix.arr[curRow][curCol - 1].isPath == true {
+                let movePlayerLeft = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1), duration: 0.1)
+                Player.run(movePlayerLeft)
+                curCol = curCol - 1
+            }
+            else {
+                movePlayerToStart()
+            }
+        case "down":
+            if curRow < numRows - 1 && matrix.arr[curRow + 1][curCol].isPath == true {
+                let movePlayerDown = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol), duration: 0.1)
+                Player.run(movePlayerDown)
+                curRow = curRow + 1
+            }
+            else {
+                movePlayerToStart()
+            }
+        case "right":
+            if curCol < numCols - 1 && matrix.arr[curRow][curCol + 1].isPath == true {
+                let movePlayerRight = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1), duration: 0.1)
+                Player.run(movePlayerRight)
+                curCol = curCol + 1
+            }
+            else {
+                movePlayerToStart()
+            }
+        default:
+            return
+        }
+    }
+    
+    func movePlayerToStart() {
+        Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
+        curRow = numRows - 1
+        curCol = numCols / 2
+        for i in travelledPath {
+            if matrix.arr[i.row][i.col].pathIndex < maxIndex {
+                matrix.arr[i.row][i.col].sprite.color = .white
+            }
+        }
     }
     
 /*
@@ -241,32 +300,18 @@ class GameScene: SKScene {
             if yDelta < 0 {
                 angle = angle + (2 * CGFloat.pi)
             }
-            if angle >= (CGFloat.pi / 4) && angle < (3 * CGFloat.pi / 4) { //up
-                if curRow > 0 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol)
-                    curRow = curRow - 1
-                }
-                if curRow == 0 {
-                    print("DING DING DING YOU DID IT!")
-                }
+            
+            if angle >= (CGFloat.pi / 4) && angle < (3 * CGFloat.pi / 4) {
+                movePlayer("up")
             }
-            else if angle >= (3 * CGFloat.pi / 4) && angle < (5 * CGFloat.pi / 4) { //left
-                if curCol > 0 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1)
-                    curCol = curCol - 1
-                }
+            else if angle >= (3 * CGFloat.pi / 4) && angle < (5 * CGFloat.pi / 4) {
+                movePlayer("left")
             }
-            else if angle >= (5 * CGFloat.pi / 4) && angle < (7 * CGFloat.pi / 4) { //down
-                if curRow < numRows - 1 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol)
-                    curRow = curRow + 1
-                }
+            else if angle >= (5 * CGFloat.pi / 4) && angle < (7 * CGFloat.pi / 4) {
+                movePlayer("down")
             }
-            else { //right
-                if curCol < numCols - 1 {
-                    Player.position = gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1)
-                    curCol = curCol + 1
-                }
+            else {
+                movePlayer("right")
             }
             
             if matrix.arr[curRow][curCol].pathIndex != 0 {
@@ -277,18 +322,6 @@ class GameScene: SKScene {
                 }
                 travelledPath.insert(Index(hashValue: (curRow*curRow*curCol)%(numRows*numCols), row: curRow, col: curCol))
             }
-            
-            if matrix.arr[curRow][curCol].isPath == false {
-                Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
-                curRow = numRows - 1
-                curCol = numCols/2
-                for i in travelledPath {
-                    if matrix.arr[i.row][i.col].pathIndex < maxIndex {
-                        matrix.arr[i.row][i.col].sprite.color = .white
-                    }
-                }
-            }
-            
         }
     }
     /*
