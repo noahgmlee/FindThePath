@@ -9,6 +9,8 @@
 import SpriteKit
 import GameplayKit
 
+let screenSize = UIScreen.main.bounds
+
 class GameScene: SKScene {
     
     var numRows = 9
@@ -30,15 +32,33 @@ class GameScene: SKScene {
     var startOfTouch:CGPoint!
     var endOfTouch:CGPoint!
     
-    var blockSize:CGFloat!
-    let screenSize = UIScreen.main.bounds
+    var blockWidth:CGFloat!
+    var blockHeight:CGFloat!
+    /*var gameArea:CGRect
+    
+    override init(size: CGSize) {
+        
+        let maxAspectRatio: CGFloat = 16.0/9.0
+        let playableWidth = size.height / maxAspectRatio
+        let margin = (size.width - playableWidth) / 2
+        gameArea = CGRect(x: margin, y: 0, width: playableWidth, height: size.height)
+        
+        super.init(size: size)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }*/
     
     override func didMove(to view: SKView) {
         
-        blockSize = screenSize.height/CGFloat(numCols) //this will be deleted when we have set sized sprites
+        //blockSize = screenSize.height/CGFloat(numCols) //this will be deleted when we have set sized sprites
+        //blockSize = gameArea.width/CGFloat(numCols)
+        blockWidth = self.size.width/CGFloat(numCols)
+        blockHeight = self.size.height/CGFloat(numRows)
         Player = SKSpriteNode(imageNamed: "Player")
-        Player.setScale(blockSize/64.0 * 0.75)
-        Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
+        Player.setScale(blockWidth/64.0 * 0.75)
+        Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
         Player.zPosition = 3.0
         self.addChild(Player)
         curRow = numRows - 1
@@ -49,14 +69,17 @@ class GameScene: SKScene {
     
     func drawGrid(_ numRows:Int, _ numCols:Int) {
         
-        blockSize = screenSize.height/CGFloat(numCols)
+        //blockSize = screenSize.height/CGFloat(numCols)
+        //blockSize = gameArea.width/CGFloat(numCols)
+        blockWidth = self.size.width/CGFloat(numCols)
+        blockHeight = self.size.height/CGFloat(numRows)
         matrix = TileMatrix(rows: numRows, cols: numCols)
         for row in 0..<numRows {
             if row == 0 || row == numRows - 1 {
                 for col in 0..<numCols {
                     let platform = SKSpriteNode(imageNamed: "WoodPlatform")
-                    platform.setScale(blockSize/64.0)
-                    platform.position = gridPosition(blockSize: blockSize, row:row, col:col)
+                    platform.setScale(blockWidth/64.0)
+                    platform.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row:row, col:col)
                     platform.zPosition = 2.0
                     self.addChild(platform)
                     matrix.arr[row][col].sprite = platform
@@ -65,8 +88,8 @@ class GameScene: SKScene {
             else {
                 for col in 0..<numCols {
                     let tile = SKSpriteNode(imageNamed: "Tile")
-                    tile.setScale(blockSize/64.0 * 0.9)
-                    tile.position = gridPosition(blockSize: blockSize, row: row, col: col)
+                    tile.setScale(blockWidth/64.0 * 0.9)
+                    tile.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: row, col: col)
                     tile.zPosition = 2.0
                     self.addChild(tile)
                     matrix.arr[row][col].sprite = tile
@@ -77,7 +100,7 @@ class GameScene: SKScene {
         
     }
     
-    func hideGrid() {
+    func deleteGrid() {
         let deleteTile = SKAction.removeFromParent()
         for row in 0..<numRows {
             for col in 0..<numCols {
@@ -89,25 +112,54 @@ class GameScene: SKScene {
     func startNewLevel() {
         level += 1
         print("Level: \(level)")
-        if level % 5 == 0 {
+        if level % 2 == 0 {
             numRows += 2
             numCols += 2
         }
         drawGrid(numRows, numCols)
+        Player.setScale(blockWidth/64.0 * 0.75)
+        Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
+        curRow = numRows - 1
+        curCol = numCols / 2
         inLevel = true
     }
     
     func endLevel() {
         inLevel = false
-        hideGrid()
+        deleteGrid()
         clearTravelledPath()
         startNewLevel()
     }
     
-    func gridPosition(blockSize:CGFloat, row:Int, col:Int) -> CGPoint {
-        let offset = blockSize / 2.0 + 0.5
-        let x = CGFloat(col) * blockSize - (blockSize * CGFloat(numCols)) / 2.0 + offset
-        let y = CGFloat(numRows - row - 1) * blockSize - (blockSize * CGFloat(numRows)) / 2.0 + offset
+    func endLevelPlayerAnimation() {
+        let movePlayerUp = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow - 1, col: curCol), duration: 0.1)
+        curRow = curRow - 1
+        let movePlayerOutOfScene = SKAction.move(by: CGVector(dx: 0, dy: blockHeight), duration: 0.5)
+        var movesFromMidCol = numCols / 2 - curCol
+        if movesFromMidCol != 0 {
+            var movePlayerTowardsMidCol:SKAction!
+            if movesFromMidCol > 0 {
+                movePlayerTowardsMidCol = SKAction.move(by: CGVector(dx: blockWidth, dy: 0), duration: 0.1)
+            }
+            else if movesFromMidCol < 0 {
+                movesFromMidCol *= -1
+                movePlayerTowardsMidCol = SKAction.move(by: CGVector(dx: -blockWidth, dy: 0), duration: 0.1)
+            }
+            let movePlayerToMidCol = SKAction.repeat(movePlayerTowardsMidCol, count: movesFromMidCol)
+            let endSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), movePlayerToMidCol, SKAction.wait(forDuration: 1), movePlayerOutOfScene, SKAction.run(movePlayerToStart), SKAction.run(endLevel)])
+            Player.run(endSequence)
+        }
+        else {
+            let endSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), movePlayerOutOfScene, /*SKAction.run(movePlayerToStart),*/ SKAction.run(endLevel)])
+            Player.run(endSequence)
+        }
+    }
+    
+    func gridPosition(blockWidth:CGFloat, blockHeight:CGFloat, row:Int, col:Int) -> CGPoint {
+        let xoffset = blockWidth / 2.0 + 0.5
+        let yoffset = blockHeight / 2.0 + 0.5
+        let x = CGFloat(col) * blockWidth - (blockWidth * CGFloat(numCols)) / 2.0 + xoffset
+        let y = CGFloat(numRows - row - 1) * blockHeight - (blockHeight * CGFloat(numRows)) / 2.0 + yoffset
         return CGPoint(x:x, y:y)
     }
     
@@ -116,10 +168,9 @@ class GameScene: SKScene {
         case "up":
             if curRow > 0 {
                 if matrix.arr[curRow - 1][curCol].isPath == true {
-                    let movePlayerUp = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow - 1, col: curCol), duration: 0.1)
+                    let movePlayerUp = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow - 1, col: curCol), duration: 0.1)
                     if curRow - 1 == 0 {
-                        let playerEndLvlSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), SKAction.run(movePlayerToStart), SKAction.run(endLevel)])
-                        Player.run(playerEndLvlSequence)
+                        endLevelPlayerAnimation()
                     }
                     else {
                         Player.run(movePlayerUp)
@@ -133,7 +184,7 @@ class GameScene: SKScene {
         case "left":
             if curCol > 0 {
                 if matrix.arr[curRow][curCol - 1].isPath == true {
-                    let movePlayerLeft = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol - 1), duration: 0.1)
+                    let movePlayerLeft = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow, col: curCol - 1), duration: 0.1)
                     Player.run(movePlayerLeft)
                     curCol = curCol - 1
                 }
@@ -144,7 +195,7 @@ class GameScene: SKScene {
         case "down":
             if curRow < numRows - 1 {
                 if matrix.arr[curRow + 1][curCol].isPath == true {
-                    let movePlayerDown = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow + 1, col: curCol), duration: 0.1)
+                    let movePlayerDown = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow + 1, col: curCol), duration: 0.1)
                     Player.run(movePlayerDown)
                     curRow = curRow + 1
                 }
@@ -155,7 +206,7 @@ class GameScene: SKScene {
         case "right":
             if curCol < numCols - 1 {
                 if matrix.arr[curRow][curCol + 1].isPath == true {
-                    let movePlayerRight = SKAction.move(to: gridPosition(blockSize: blockSize, row: curRow, col: curCol + 1), duration: 0.1)
+                    let movePlayerRight = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow, col: curCol + 1), duration: 0.1)
                     Player.run(movePlayerRight)
                     curCol = curCol + 1
                 }
@@ -169,12 +220,14 @@ class GameScene: SKScene {
     }
     
     func movePlayerToStart() {
-        Player.position = gridPosition(blockSize: blockSize, row: numRows - 1, col: numCols/2)
+        //Player.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.5), SKAction.run({self.Player.position = self.gridPosition(blockSize: self.blockSize, row: self.numRows - 1, col: self.numCols/2)}), SKAction.fadeIn(withDuration: 0.5)]))
+        Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
         curRow = numRows - 1
         curCol = numCols / 2
         for i in travelledPath {
             if matrix.arr[i.row][i.col].pathIndex < maxIndex {
-                matrix.arr[i.row][i.col].sprite.color = .white
+                let changeToWhite = SKAction.colorize(with: .white, colorBlendFactor: 1, duration: 0.5)
+                matrix.arr[i.row][i.col].sprite.run(changeToWhite)
             }
         }
     }
