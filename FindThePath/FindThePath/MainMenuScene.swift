@@ -10,14 +10,15 @@ import SpriteKit
 
 class MainMenuScene: SKScene {
     
-    let playButtonLabel = SKSpriteNode(imageNamed: "PlayButton")
+    let playButtonLabel = SKLabelNode(fontNamed: "theboldfont")
     
     override func didMove(to view: SKView) {
         
+        playButtonLabel.text = "Play"
+        playButtonLabel.fontSize = 125
         playButtonLabel.position = CGPoint(x: 0, y: 0)
         playButtonLabel.zPosition = 5
-        playButtonLabel.setScale(1)
-        playButtonLabel.color = .orange
+        playButtonLabel.color = .white
         self.addChild(playButtonLabel)
         
     }

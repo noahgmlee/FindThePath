@@ -32,13 +32,17 @@
 	<true/>
 	<key>UIStatusBarHidden</key>
 	<true/>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
+	<key>UIAppFonts</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
+		<string>theboldfont.ttf</string>
 	</array>
 </dict>
 </plist>

@@ -10,14 +10,16 @@ import SpriteKit
 import GameplayKit
 
 let screenSize = UIScreen.main.bounds
+var level = 0
 
 class GameScene: SKScene {
     
     var numRows = 9
     var numCols = 5
     
-    var level = 0
     var inLevel = false
+    var gameOver = false
+    var timeRemaining = 90
     
     var curRow:Int!
     var curCol:Int!
@@ -26,6 +28,8 @@ class GameScene: SKScene {
     var travelledPath = Set<Index>()
     
     var Player:SKSpriteNode!
+    var levelLabel = SKLabelNode(fontNamed: "theboldfont")
+    var timerLabel = SKLabelNode(fontNamed: "theboldfont")
     let fadeIn = SKAction.fadeIn(withDuration: 5)
     let fadeOut = SKAction.fadeOut(withDuration: 5)
     
@@ -56,11 +60,29 @@ class GameScene: SKScene {
         //blockSize = gameArea.width/CGFloat(numCols)
         blockWidth = self.size.width/CGFloat(numCols)
         blockHeight = self.size.height/CGFloat(numRows)
+        
         Player = SKSpriteNode(imageNamed: "Player")
         Player.setScale(blockWidth/64.0 * 0.75)
         Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
         Player.zPosition = 3.0
         self.addChild(Player)
+        
+        levelLabel.fontSize = 30
+        levelLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+        levelLabel.position = CGPoint(x: -self.size.width/2 * 0.95, y: self.size.height/2 * 0.925)
+        levelLabel.zPosition = 100
+        levelLabel.color = .black
+        self.addChild(levelLabel)
+        
+        timerLabel.text = "\(timeRemaining)"
+        timerLabel.fontSize = 50
+        timerLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.right
+        timerLabel.position = CGPoint(x: self.size.width/2 * 0.95, y: self.size.height/2 * 0.9)
+        timerLabel.zPosition = 100
+        timerLabel.color = .white
+        self.addChild(timerLabel)
+        
+        //timeRemaining = 10
         curRow = numRows - 1
         curCol = numCols / 2
         
@@ -111,8 +133,13 @@ class GameScene: SKScene {
     
     func startNewLevel() {
         level += 1
+        levelLabel.text = "Level: \(level)"
+        if level > 1 {
+            timeRemaining += 30
+            timerLabel.text = "\(timeRemaining)"
+        }
         print("Level: \(level)")
-        if level % 2 == 0 {
+        if level % 5 == 0 {
             numRows += 2
             numCols += 2
         }
@@ -121,6 +148,8 @@ class GameScene: SKScene {
         Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
         curRow = numRows - 1
         curCol = numCols / 2
+        maxIndex = 0
+        startTimer()
         inLevel = true
     }
     
@@ -128,7 +157,49 @@ class GameScene: SKScene {
         inLevel = false
         deleteGrid()
         clearTravelledPath()
-        startNewLevel()
+        if gameOver == false {
+            startNewLevel()
+        }
+        else {
+            let sceneToMoveTo = GameOverScene(fileNamed: "GameOverScene")
+            sceneToMoveTo!.scaleMode = self.scaleMode
+            let fadeTransition = SKTransition.fade(withDuration: 0.5)
+            self.view!.presentScene(sceneToMoveTo!, transition: fadeTransition)
+        }
+    }
+    
+    func startTimer() {
+        let updateTimerAction = SKAction.run(updateTimer)
+        let wait1sec = SKAction.wait(forDuration: 1)
+        let timerSequence = SKAction.sequence([wait1sec, updateTimerAction])
+        let repeatTimerSequence = SKAction.repeatForever(timerSequence)
+        run(repeatTimerSequence, withKey: "timer")
+        
+    }
+    
+    func updateTimer() {
+        if timeRemaining > 0 {
+            timeRemaining -= 1
+            timerLabel.text = "\(timeRemaining)"
+            if timeRemaining > 10 && timeRemaining <= 30 && timerLabel.color != .yellow {
+                timerLabel.color = .yellow
+                timerLabel.colorBlendFactor = 1
+            }
+            else if timeRemaining <= 10 {
+                if timerLabel.color != .red {
+                    timerLabel.color = .red
+                    timerLabel.colorBlendFactor = 1
+                }
+                let scaleUp = SKAction.scale(to: 1.5, duration: 0.2)
+                let scaleDown = SKAction.scale(to: 1, duration: 0.2)
+                let scaleSequence = SKAction.sequence([scaleUp, scaleDown])
+                timerLabel.run(scaleSequence)
+            }
+        }
+        else {
+            gameOver = true
+            endLevel()
+        }
     }
     
     func endLevelPlayerAnimation() {
@@ -150,7 +221,7 @@ class GameScene: SKScene {
             Player.run(endSequence)
         }
         else {
-            let endSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), movePlayerOutOfScene, /*SKAction.run(movePlayerToStart),*/ SKAction.run(endLevel)])
+            let endSequence = SKAction.sequence([movePlayerUp, SKAction.wait(forDuration: 1), movePlayerOutOfScene, SKAction.run(endLevel)])
             Player.run(endSequence)
         }
     }
@@ -170,6 +241,7 @@ class GameScene: SKScene {
                 if matrix.arr[curRow - 1][curCol].isPath == true {
                     let movePlayerUp = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow - 1, col: curCol), duration: 0.1)
                     if curRow - 1 == 0 {
+                        removeAction(forKey: "timer")
                         endLevelPlayerAnimation()
                     }
                     else {
