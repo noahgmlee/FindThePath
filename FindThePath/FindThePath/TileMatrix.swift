@@ -55,7 +55,7 @@ class TileMatrix{
             let dir = Int(arc4random_uniform(3)) //0 = left, 1 = up, 2 = right
             if dir == 0 {
                 if curColumn > 0 {
-                    if !arr[curRow][curColumn - 1].isPath {
+                    if !arr[curRow][curColumn - 1].isPath && !arr[curRow + 1][curColumn - 1].isPath {
                         curColumn -= 1
                         curPathIndex += 1
                     }
@@ -71,7 +71,7 @@ class TileMatrix{
             }
             if dir == 2 {
                 if curColumn < numCols - 1 {
-                    if !arr[curRow][curColumn + 1].isPath {
+                    if !arr[curRow][curColumn + 1].isPath && !arr[curRow + 1][curColumn + 1].isPath {
                         curColumn += 1
                         curPathIndex += 1
                     }
