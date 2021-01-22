@@ -15,7 +15,8 @@ class MainMenuScene: SKScene {
     override func didMove(to view: SKView) {
         
         playButtonLabel.text = "Play"
-        playButtonLabel.fontSize = 125
+        playButtonLabel.fontSize = screenSize.width * 0.36 //150
+        print(screenSize.width)
         playButtonLabel.position = CGPoint(x: 0, y: 0)
         playButtonLabel.zPosition = 5
         playButtonLabel.color = .white
@@ -33,6 +34,7 @@ class MainMenuScene: SKScene {
                 
                 let sceneToMoveTo = GameScene(fileNamed: "GameScene")
                 sceneToMoveTo!.scaleMode = self.scaleMode
+                sceneToMoveTo!.size = self.size
                 let fadeTransition = SKTransition.fade(withDuration: 0.5)
                 self.view!.presentScene(sceneToMoveTo!, transition: fadeTransition)
                 
