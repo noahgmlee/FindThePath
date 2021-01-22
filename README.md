@@ -1,3 +1,6 @@
-# app
+# iOS app
 Noah Lee and Alessandro Menchetti
-me and ale make a app together
+
+version 1.0
+
+Find the path style game developed for iOS versions 9+.
