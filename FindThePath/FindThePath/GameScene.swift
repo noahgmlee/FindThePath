@@ -212,7 +212,11 @@ class GameScene: SKScene {
         drawGrid(numRows, numCols)
         //Player.setScale(blockWidth/64.0 * 0.75)
         Player.setScale(blockWidth/232.0 * 0.7)
-        Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
+        let movePlayerUp = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2), duration: 0.75)
+        let movePlayerAnimation = SKAction.group([slowFrogJumpAnimation, movePlayerUp])
+        
+        Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows, col: numCols/2)
+        Player.run(movePlayerAnimation)
         //Player.run(frogTextureAnimation)
         curRow = numRows - 1
         curCol = numCols / 2
