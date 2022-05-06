@@ -30,6 +30,7 @@ class TileMatrix{
     var numRows:Int!
     var numCols:Int!
     var arr:[[Tile]]!
+    var pathLen:Int!
     
     convenience init(rows: Int, cols: Int){
         self.init()
@@ -39,47 +40,47 @@ class TileMatrix{
     }
     
     func createPath() {
-        let startIndex = Int(arc4random_uniform(UInt32(numCols)))
         var curRow = numRows - 2
-        var curColumn = startIndex
+        var curCol = numCols / 2
         var curPathIndex = 1
         for i in 0..<(numCols) {
             arr[0][i].isPath = true
             arr[numRows - 1][i].isPath = true
         }
         
-        arr[curRow][startIndex].isPath = true
-        arr[curRow][startIndex].pathIndex = curPathIndex
+        arr[curRow][curCol].isPath = true
+        arr[curRow][curCol].pathIndex = curPathIndex
         
         while curRow > 1 {
             let dir = Int(arc4random_uniform(3)) //0 = left, 1 = up, 2 = right
             if dir == 0 {
-                if curColumn > 0 {
-                    if !arr[curRow][curColumn - 1].isPath && !arr[curRow + 1][curColumn - 1].isPath {
-                        curColumn -= 1
+                if curCol > 0 {
+                    if !arr[curRow][curCol - 1].isPath && !arr[curRow + 1][curCol - 1].isPath {
+                        curCol -= 1
                         curPathIndex += 1
                     }
                 }
             }
             if dir == 1 {
                 if curRow > 0 {
-                    if !arr[curRow - 1][curColumn].isPath {
+                    if !arr[curRow - 1][curCol].isPath {
                         curRow -= 1
                         curPathIndex += 1
                     }
                 }
             }
             if dir == 2 {
-                if curColumn < numCols - 1 {
-                    if !arr[curRow][curColumn + 1].isPath && !arr[curRow + 1][curColumn + 1].isPath {
-                        curColumn += 1
+                if curCol < numCols - 1 {
+                    if !arr[curRow][curCol + 1].isPath && !arr[curRow + 1][curCol + 1].isPath {
+                        curCol += 1
                         curPathIndex += 1
                     }
                 }
             }
-            arr![curRow][curColumn].isPath = true
-            arr![curRow][curColumn].pathIndex = curPathIndex
+            arr![curRow][curCol].isPath = true
+            arr![curRow][curCol].pathIndex = curPathIndex
         }
+        pathLen = curPathIndex
         for (count, row) in arr.enumerated(){
             for val in row {
                 print(val.isPath, terminator:"")

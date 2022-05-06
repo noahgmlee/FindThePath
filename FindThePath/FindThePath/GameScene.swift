@@ -18,9 +18,9 @@ class GameScene: SKScene {
     var numRows = 6
     var numCols = 3
     
-    var inLevel = false
+    var playerMoveAllowed = false
     var gameOver = false
-    var timeRemaining = 15
+    var timeRemaining = 90
     
     var curRow:Int!
     var curCol:Int!
@@ -34,6 +34,7 @@ class GameScene: SKScene {
     var slowFrogJumpAnimation:SKAction!
     var levelLabel = SKLabelNode(fontNamed: "theboldfont")
     var timerLabel = SKLabelNode(fontNamed: "theboldfont")
+    var pauseButton:SKSpriteNode!
     let fadeIn = SKAction.fadeIn(withDuration: 1)
     let fadeOut = SKAction.fadeOut(withDuration: 1)
     
@@ -42,6 +43,8 @@ class GameScene: SKScene {
     
     var blockWidth:CGFloat!
     var blockHeight:CGFloat!
+    
+    var wasPaused = false
     /*var gameArea:CGRect
     
     override init(size: CGSize) {
@@ -67,53 +70,66 @@ class GameScene: SKScene {
         
         //print(screenSize.width)
         //print(screenSize.height)
-        
-        for i in 1...7 {
-            frogTextures.append(SKTexture(imageNamed: "frog\(i)"))
-        }
-        frogJumpAnimation = SKAction.animate(with: frogTextures, timePerFrame: 0.2/7, resize: false, restore: true)
-        slowFrogJumpAnimation = SKAction.animate(with: frogTextures, timePerFrame: 0.5/7, resize: false, restore: true)
-        
-        Player = SKSpriteNode(imageNamed: "frog1")
-        //Player.setScale(blockWidth/64.0 * 0.75)
-        //Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
-        Player.zPosition = 3.0
-        self.addChild(Player)
-        
-        levelLabel.fontSize = screenSize.width * 0.05
-        levelLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
-        if aspectRatio == "19.5by9" {
-            levelLabel.position = CGPoint(x: -self.size.width/2 * 0.86, y: self.size.height/2 * 0.93)
+        if !wasPaused {
+            for i in 1...7 {
+                frogTextures.append(SKTexture(imageNamed: "frog\(i)"))
+            }
+            frogJumpAnimation = SKAction.animate(with: frogTextures, timePerFrame: 0.2/7, resize: false, restore: true)
+            slowFrogJumpAnimation = SKAction.animate(with: frogTextures, timePerFrame: 0.5/7, resize: false, restore: true)
+            
+            Player = SKSpriteNode(imageNamed: "frog1")
+            //Player.setScale(blockWidth/64.0 * 0.75)
+            //Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows - 1, col: numCols/2)
+            Player.zPosition = 3.0
+            self.addChild(Player)
+            
+            levelLabel.fontSize = screenSize.width * 0.05
+            levelLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.left
+            if aspectRatio == "19.5by9" {
+                levelLabel.position = CGPoint(x: -self.size.width/2 * 0.86, y: self.size.height/2 * 0.93)
+            }
+            else {
+                levelLabel.position = CGPoint(x: -self.size.width/2 * 0.95, y: self.size.height/2 * 0.925)
+            }
+            levelLabel.zPosition = 100
+            levelLabel.color = .white
+            self.addChild(levelLabel)
+            
+            pauseButton = SKSpriteNode(imageNamed: "PauseButton")
+            pauseButton.position = CGPoint(x: 0, y: self.size.height/2 * 0.95)
+            pauseButton.zPosition = 100
+            pauseButton.setScale(self.size.height/1000 * 0.04)
+            self.addChild(pauseButton)
+            
+            timerLabel.text = "\(timeRemaining)"
+            timerLabel.fontSize = screenSize.width * 0.07
+            timerLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.right
+            if aspectRatio == "19.5by9" {
+                timerLabel.position = CGPoint(x: self.size.width/2 * 0.81, y: self.size.height/2 * 0.925)
+            }
+            else {
+                timerLabel.position = CGPoint(x: self.size.width/2 * 0.95, y: self.size.height/2 * 0.9)
+            }
+            timerLabel.zPosition = 100
+            timerLabel.color = .white
+            self.addChild(timerLabel)
+            
+            //timeRemaining = 10
+            curRow = numRows - 1
+            curCol = numCols / 2
+            
+            startNewLevel()
+            drawBackground(scene: self)
         }
         else {
-            levelLabel.position = CGPoint(x: -self.size.width/2 * 0.95, y: self.size.height/2 * 0.925)
+            self.isPaused = false
+            wasPaused = false
+            self.run(buttonClickSound)
         }
-        levelLabel.zPosition = 100
-        levelLabel.color = .white
-        self.addChild(levelLabel)
         
-        timerLabel.text = "\(timeRemaining)"
-        timerLabel.fontSize = screenSize.width * 0.07
-        timerLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.right
-        if aspectRatio == "19.5by9" {
-            timerLabel.position = CGPoint(x: self.size.width/2 * 0.81, y: self.size.height/2 * 0.925)
-        }
-        else {
-            timerLabel.position = CGPoint(x: self.size.width/2 * 0.95, y: self.size.height/2 * 0.9)
-        }
-        timerLabel.zPosition = 100
-        timerLabel.color = .white
-        self.addChild(timerLabel)
-        
-        //timeRemaining = 10
-        curRow = numRows - 1
-        curCol = numCols / 2
-        
-        startNewLevel()
-        drawBackground()
     }
     
-    func drawBackground() {
+    /*func drawBackground() {
         let size = CGFloat(280.0)
         let bgCols = Int(self.size.width/size) + 1
         let bgRows = Int(self.size.height/size) + 1
@@ -128,10 +144,7 @@ class GameScene: SKScene {
                 self.addChild(bgTile)
             }
         }
-        /*print(self.size.height)
-        print(screenSize.height)
-        print(bgRows)*/
-    }
+    }*/
     
     func drawGrid(_ numRows:Int, _ numCols:Int) {
         
@@ -171,7 +184,13 @@ class GameScene: SKScene {
                     let lilypad = SKSpriteNode(imageNamed: "lilypad_green")
                     //tile.setScale(blockHeight/224.0 * 0.9)
                     lilypad.zRotation = CGFloat(angle) * CGFloat.pi / 180
-                    lilypad.setScale(blockWidth < blockHeight ? (blockWidth/228.0 * 0.9) : (blockHeight/224.0 * 0.9))
+                    //lilypad.setScale(blockWidth < blockHeight ? (blockWidth/228.0 * 0.9) : (blockHeight/224.0 * 0.9))
+                    if blockWidth < blockHeight {
+                        lilypad.setScale(blockWidth/228.0 * 0.9)
+                    }
+                    else {
+                        lilypad.setScale(blockHeight/224.0 * 0.9)
+                    }
                     lilypad.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: row, col: col)
                     lilypad.zPosition = 2.0
                     self.addChild(lilypad)
@@ -180,6 +199,9 @@ class GameScene: SKScene {
             }
         }
         matrix.createPath()
+        matrix.arr[numRows - 2][numCols / 2].sprite.color = .black
+        matrix.arr[numRows - 2][numCols / 2].sprite.colorBlendFactor = 0.5
+        print(matrix.pathLen)
         
     }
     
@@ -201,7 +223,7 @@ class GameScene: SKScene {
             levelLabel.text = "Level: \(level)"
         }
         if level > 1 {
-            timeRemaining += 30
+            timeRemaining += 45
             timerLabel.text = "\(timeRemaining)"
         }
         print("Level: \(level)")
@@ -221,12 +243,14 @@ class GameScene: SKScene {
         curRow = numRows - 1
         curCol = numCols / 2
         maxIndex = 0
+        timerLabel.color = .white
+        timerLabel.colorBlendFactor = 1
         startTimer()
-        inLevel = true
+        playerMoveAllowed = true
     }
     
     func endLevel() {
-        inLevel = false
+        playerMoveAllowed = false
         deleteGrid()
         clearTravelledPath()
         if gameOver == false {
@@ -278,7 +302,7 @@ class GameScene: SKScene {
     func failAnimation() {
         let shrink = SKAction.scale(to: 0, duration: 0.5)
         let rotate = SKAction.rotate(byAngle: 360 * CGFloat.pi / 180, duration: 0.5)
-        let fallAnimation = SKAction.group([shrink, rotate])
+        let fallAnimation = SKAction.group([splashSound, shrink, rotate])
         Player.run(fallAnimation)
         matrix.arr[curRow][curCol].sprite.run(fallAnimation)
     }
@@ -324,12 +348,12 @@ class GameScene: SKScene {
         return CGPoint(x:x, y:y)
     }
     
-    func bgGridPosition(blockSize:CGFloat, bgRows:Int, bgCols:Int, row:Int, col:Int) -> CGPoint {
+    /*func bgGridPosition(blockSize:CGFloat, bgRows:Int, bgCols:Int, row:Int, col:Int) -> CGPoint {
         let offset = blockSize / 2.0 + 0.5
         let x = CGFloat(col) * blockSize - (blockSize * CGFloat(bgCols)) / 2.0 + offset
         let y = CGFloat(bgRows - row - 1) * blockSize - (blockSize * CGFloat(bgRows)) / 2.0 + offset
         return CGPoint(x:x, y:y)
-    }
+    }*/
     
     func movePlayer(_ dir:String) {
         var movePlayerAnimation:SKAction!
@@ -338,7 +362,7 @@ class GameScene: SKScene {
         case "up":
             if curRow > 0 { //stop player from moving out of grid
                 let movePlayerUp = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow - 1, col: curCol), duration: 0.2)
-                movePlayerAnimation = SKAction.group([frogJumpAnimation, movePlayerUp])
+                movePlayerAnimation = SKAction.group([jumpSound, frogJumpAnimation, movePlayerUp])
                 rotatePlayer = SKAction.rotate(toAngle: CGFloat(0) * CGFloat.pi / 180, duration: 0.1)
                 if matrix.arr[curRow - 1][curCol].isPath == true { //if move is valid
                     if curRow - 1 == 0 { //if player made it to end
@@ -356,6 +380,7 @@ class GameScene: SKScene {
                     }
                 }
                 else { //if move is not valid
+                    playerMoveAllowed = false
                     curRow = curRow - 1
                     if Player.zRotation == 0 {
                         Player.run(SKAction.sequence([movePlayerAnimation, SKAction.run(failAnimation), SKAction.wait(forDuration: 0.5), SKAction.run(movePlayerToStart)]))
@@ -369,7 +394,7 @@ class GameScene: SKScene {
         case "left":
             if curCol > 0 { //stop player from moving out of grid
                 let movePlayerLeft = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow, col: curCol - 1), duration: 0.2)
-                movePlayerAnimation = SKAction.group([frogJumpAnimation, movePlayerLeft])
+                movePlayerAnimation = SKAction.group([jumpSound, frogJumpAnimation, movePlayerLeft])
                 rotatePlayer = SKAction.rotate(toAngle: CGFloat(90) * CGFloat.pi / 180, duration: 0.1)
                 if matrix.arr[curRow][curCol - 1].isPath == true { //if move is valid
                     
@@ -382,6 +407,7 @@ class GameScene: SKScene {
                     curCol = curCol - 1
                 }
                 else { //if move is not valid
+                    playerMoveAllowed = false
                     curCol = curCol - 1
                     if Player.zRotation == 90 {
                         Player.run(SKAction.sequence([movePlayerAnimation, SKAction.run(failAnimation), SKAction.wait(forDuration: 0.5), SKAction.run(movePlayerToStart)]))
@@ -395,7 +421,7 @@ class GameScene: SKScene {
         case "down":
             if curRow < numRows - 1 { //stop player from moving out of grid
                 let movePlayerDown = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow + 1, col: curCol), duration: 0.2)
-                movePlayerAnimation = SKAction.group([frogJumpAnimation, movePlayerDown])
+                movePlayerAnimation = SKAction.group([jumpSound, frogJumpAnimation, movePlayerDown])
                 rotatePlayer = SKAction.rotate(toAngle: CGFloat(180) * CGFloat.pi / 180, duration: 0.1)
                 if matrix.arr[curRow + 1][curCol].isPath == true { //if move is valid
                     
@@ -408,6 +434,7 @@ class GameScene: SKScene {
                     curRow = curRow + 1
                 }
                 else { //if move is not valid
+                    playerMoveAllowed = false
                     curRow = curRow + 1
                     if Player.zRotation == 180 {
                         Player.run(SKAction.sequence([movePlayerAnimation, SKAction.run(failAnimation), SKAction.wait(forDuration: 0.5), SKAction.run(movePlayerToStart)]))
@@ -421,7 +448,7 @@ class GameScene: SKScene {
         case "right":
             if curCol < numCols - 1 { //stop player from moving out of grid
                 let movePlayerRight = SKAction.move(to: gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: curRow, col: curCol + 1), duration: 0.2)
-                movePlayerAnimation = SKAction.group([frogJumpAnimation, movePlayerRight])
+                movePlayerAnimation = SKAction.group([jumpSound, frogJumpAnimation, movePlayerRight])
                 rotatePlayer = SKAction.rotate(toAngle: CGFloat(270) * CGFloat.pi / 180, duration: 0.1)
                 if matrix.arr[curRow][curCol + 1].isPath == true { //if move is valid
                     
@@ -434,6 +461,7 @@ class GameScene: SKScene {
                     curCol = curCol + 1
                 }
                 else { //if move is not valid
+                    playerMoveAllowed = false
                     curCol = curCol + 1
                     if Player.zRotation == 270 {
                         Player.run(SKAction.sequence([movePlayerAnimation, SKAction.run(failAnimation), SKAction.wait(forDuration: 0.5), SKAction.run(movePlayerToStart)]))
@@ -455,7 +483,13 @@ class GameScene: SKScene {
         let movePlayerAnimation = SKAction.group([slowFrogJumpAnimation, movePlayerUp])
         
         Player.position = gridPosition(blockWidth: blockWidth, blockHeight: blockHeight, row: numRows, col: numCols/2)
-        matrix.arr[curRow][curCol].sprite.run(SKAction.scale(to: (blockWidth < blockHeight ? (blockWidth/228.0 * 0.9) : (blockHeight/224.0 * 0.9)), duration: 0.5))
+        //matrix.arr[curRow][curCol].sprite.run(SKAction.scale(to: (blockWidth < blockHeight ? (blockWidth/228.0 * 0.9) : (blockHeight/224.0 * 0.9)), duration: 0.5))
+        if blockWidth < blockHeight {
+            matrix.arr[curRow][curCol].sprite.run(SKAction.scale(to: blockWidth/228.0 * 0.9, duration: 0.5))
+        }
+        else {
+            matrix.arr[curRow][curCol].sprite.run(SKAction.scale(to: blockWidth/224.0 * 0.9, duration: 0.5))
+        }
         //Player.zRotation = 0
         Player.run(SKAction.rotate(toAngle: CGFloat(0) * CGFloat.pi / 180, duration: 0.1))
         Player.run(SKAction.scale(to: blockWidth/232.0 * 0.7, duration: 0.5))
@@ -469,6 +503,7 @@ class GameScene: SKScene {
                 matrix.arr[i.row][i.col].sprite.run(changeToWhite)
             }
         }
+        playerMoveAllowed = true
     }
     
     func clearTravelledPath() {
@@ -477,7 +512,7 @@ class GameScene: SKScene {
     
     func updateTravelledPath() {
         if matrix.arr[curRow][curCol].pathIndex != 0 {
-            matrix.arr[curRow][curCol].sprite.color = .red
+            matrix.arr[curRow][curCol].sprite.color = .black
             matrix.arr[curRow][curCol].sprite.colorBlendFactor = 0.5
             //matrix.arr[curRow][curCol].sprite.addGlow()
             if matrix.arr[curRow][curCol].pathIndex > maxIndex {
@@ -492,13 +527,26 @@ class GameScene: SKScene {
             
             startOfTouch = t.location(in: self)
             
+            if pauseButton.contains(startOfTouch) {
+                
+                self.run(buttonClickSound)
+                wasPaused = true
+                let sceneToMoveTo = PauseScene(fileNamed: "PauseScene")
+                sceneToMoveTo!.parentScene = self
+                sceneToMoveTo!.scaleMode = self.scaleMode
+                sceneToMoveTo!.size = self.size
+                //let fadeTransition = SKTransition.fade(withDuration: 0.5)
+                self.isPaused = true
+                self.view!.presentScene(sceneToMoveTo!)/*, transition: fadeTransition)*/
+                
+            }
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches {
             
-            if inLevel == true {
+            if playerMoveAllowed == true {
                 endOfTouch = t.location(in: self)
                 let xDelta = endOfTouch.x - startOfTouch.x
                 let yDelta = endOfTouch.y - startOfTouch.y

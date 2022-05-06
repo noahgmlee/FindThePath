@@ -67,6 +67,8 @@ class GameOverScene: SKScene {
         exitLabel.color = .white
         self.addChild(exitLabel)
         
+        drawBackground(scene: self)
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -77,6 +79,7 @@ class GameOverScene: SKScene {
             
             if playAgainLabel.contains(pointOfTouch) {
                 
+                self.run(buttonClickSound)
                 let sceneToMoveTo = GameScene(fileNamed: "GameScene")
                 sceneToMoveTo!.scaleMode = self.scaleMode
                 sceneToMoveTo!.size = self.size
@@ -86,6 +89,7 @@ class GameOverScene: SKScene {
             }
             else if exitLabel.contains(pointOfTouch) {
                 
+                self.run(buttonClickSound)
                 let sceneToMoveTo = MainMenuScene(fileNamed: "MainMenuScene")
                 sceneToMoveTo!.scaleMode = self.scaleMode
                 sceneToMoveTo!.size = self.size

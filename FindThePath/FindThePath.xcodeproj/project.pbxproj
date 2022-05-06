@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		71395B1D2824BB3500017E1B /* PauseScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 71395B1C2824BB3500017E1B /* PauseScene.sks */; };
+		71395B202824BB8F00017E1B /* PauseScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71395B1F2824BB8F00017E1B /* PauseScene.swift */; };
+		71395B262824D08100017E1B /* ButtonClickSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 71395B232824D08100017E1B /* ButtonClickSound.mp3 */; };
+		71395B272824D08100017E1B /* SplashSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 71395B242824D08100017E1B /* SplashSound.mp3 */; };
+		71395B282824D08100017E1B /* JumpSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 71395B252824D08100017E1B /* JumpSound.mp3 */; };
+		718A0F2825BCCA5300727ECF /* HelpScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A0F2725BCCA5300727ECF /* HelpScene.swift */; };
+		718A0F2C25BCD44C00727ECF /* HelpScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 718A0F2B25BCD44C00727ECF /* HelpScene.sks */; };
 		71BEB71F25AD29B800CFB3FF /* MainMenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BEB71E25AD29B800CFB3FF /* MainMenuScene.swift */; };
 		71BEB72625AD317D00CFB3FF /* MainMenuScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 71BEB72525AD317D00CFB3FF /* MainMenuScene.sks */; };
 		71BEB73225AFD28F00CFB3FF /* theboldfont.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 71BEB73125AFD28F00CFB3FF /* theboldfont.ttf */; };
@@ -25,6 +32,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		71395B1C2824BB3500017E1B /* PauseScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = PauseScene.sks; sourceTree = "<group>"; };
+		71395B1F2824BB8F00017E1B /* PauseScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseScene.swift; sourceTree = "<group>"; };
+		71395B232824D08100017E1B /* ButtonClickSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = ButtonClickSound.mp3; sourceTree = "<group>"; };
+		71395B242824D08100017E1B /* SplashSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = SplashSound.mp3; sourceTree = "<group>"; };
+		71395B252824D08100017E1B /* JumpSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = JumpSound.mp3; sourceTree = "<group>"; };
+		718A0F2725BCCA5300727ECF /* HelpScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpScene.swift; sourceTree = "<group>"; };
+		718A0F2B25BCD44C00727ECF /* HelpScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = HelpScene.sks; sourceTree = "<group>"; };
 		71BEB71E25AD29B800CFB3FF /* MainMenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuScene.swift; sourceTree = "<group>"; };
 		71BEB72525AD317D00CFB3FF /* MainMenuScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MainMenuScene.sks; sourceTree = "<group>"; };
 		71BEB73125AFD28F00CFB3FF /* theboldfont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = theboldfont.ttf; sourceTree = "<group>"; };
@@ -76,17 +90,24 @@
 			children = (
 				F672745725A65A3900B2D90E /* AppDelegate.swift */,
 				71BEB72525AD317D00CFB3FF /* MainMenuScene.sks */,
+				718A0F2B25BCD44C00727ECF /* HelpScene.sks */,
 				F672745925A65A3900B2D90E /* GameScene.sks */,
+				71395B1C2824BB3500017E1B /* PauseScene.sks */,
 				71BEB73B25AFE41A00CFB3FF /* GameOverScene.sks */,
 				F672745B25A65A3900B2D90E /* Actions.sks */,
 				71BEB73125AFD28F00CFB3FF /* theboldfont.ttf */,
 				71BEB71E25AD29B800CFB3FF /* MainMenuScene.swift */,
+				718A0F2725BCCA5300727ECF /* HelpScene.swift */,
 				F672745D25A65A3900B2D90E /* GameScene.swift */,
+				71395B1F2824BB8F00017E1B /* PauseScene.swift */,
 				71BEB73825AFE37800CFB3FF /* GameOverScene.swift */,
 				F620B0CE25A7CBCD006691B8 /* TileMatrix.swift */,
 				71D0E5A825B9318C001E4E15 /* SKSpriteNode+addGlow.swift */,
 				F672745F25A65A3900B2D90E /* GameViewController.swift */,
 				F672746125A65A3900B2D90E /* Main.storyboard */,
+				71395B232824D08100017E1B /* ButtonClickSound.mp3 */,
+				71395B252824D08100017E1B /* JumpSound.mp3 */,
+				71395B242824D08100017E1B /* SplashSound.mp3 */,
 				F672746425A65A3900B2D90E /* Assets.xcassets */,
 				F672746625A65A3900B2D90E /* LaunchScreen.storyboard */,
 				F672746925A65A3900B2D90E /* Info.plist */,
@@ -156,10 +177,15 @@
 				71BEB72625AD317D00CFB3FF /* MainMenuScene.sks in Resources */,
 				F672746325A65A3900B2D90E /* Main.storyboard in Resources */,
 				F672745A25A65A3900B2D90E /* GameScene.sks in Resources */,
+				71395B1D2824BB3500017E1B /* PauseScene.sks in Resources */,
+				71395B262824D08100017E1B /* ButtonClickSound.mp3 in Resources */,
+				71395B272824D08100017E1B /* SplashSound.mp3 in Resources */,
 				F672746525A65A3900B2D90E /* Assets.xcassets in Resources */,
 				71BEB73C25AFE41A00CFB3FF /* GameOverScene.sks in Resources */,
+				718A0F2C25BCD44C00727ECF /* HelpScene.sks in Resources */,
 				F672746825A65A3900B2D90E /* LaunchScreen.storyboard in Resources */,
 				F672745C25A65A3900B2D90E /* Actions.sks in Resources */,
+				71395B282824D08100017E1B /* JumpSound.mp3 in Resources */,
 				71BEB73225AFD28F00CFB3FF /* theboldfont.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -172,6 +198,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				71BEB71F25AD29B800CFB3FF /* MainMenuScene.swift in Sources */,
+				718A0F2825BCCA5300727ECF /* HelpScene.swift in Sources */,
+				71395B202824BB8F00017E1B /* PauseScene.swift in Sources */,
 				71D0E5A925B9318C001E4E15 /* SKSpriteNode+addGlow.swift in Sources */,
 				F672745E25A65A3900B2D90E /* GameScene.swift in Sources */,
 				F672746025A65A3900B2D90E /* GameViewController.swift in Sources */,
@@ -316,7 +344,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = FindThePath/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NoahAle.FindThePath;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -331,7 +359,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = FindThePath/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.NoahAle.FindThePath;
 				PRODUCT_NAME = "$(TARGET_NAME)";
